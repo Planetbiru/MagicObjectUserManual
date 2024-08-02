@@ -1,0 +1,65 @@
+2. **AND inside OR**
+
+Example:
+
+`SELECT * FROM album WHERE waiting_for = 0 or (waiting_for is null and approval_id is null)`
+
+We can create specifications within specifications.
+
+```php
+$specification = new PicoSpecification();
+
+// create predicate1
+$predicate1 = new PicoPredicate();
+$predicate1->equals('waitingFor', 0);
+
+// create predicate2
+$predicate2 = new PicoPredicate();
+$predicate2->equals('waitingFor', null);
+
+// create predicate3
+$predicate3 = new PicoPredicate();
+$predicate3->equals('approvalId', null);
+
+
+// create specification2
+$specification2 = new PicoSpecification();
+
+// add predicate2 into specification2 with logic AND
+$specification2->addAnd($predicate2);
+
+// add predicate3 into specification2 with logic AND
+$specification2->addAnd($predicate3);
+
+// add predicate1 into specification with login OR
+$specification->addOr($predicate1)
+
+// add specification2 into specification with login OR
+$specification->addOr($specification2)
+```
+
+A shorter code to create the above specification is as follows
+
+```php
+$specification = PicoSpecification::getInstance()
+    ->addOr(PicoPredicate::getInstance()->equals('waitingFor', 0))
+    ->addOr(
+        PicoSpecification::getInstance()
+            ->addAnd(PicoPredicate::getInstance()->equals('waitingFor', null))
+            ->addAnd(PicoPredicate::getInstance()->equals('approvalId', null))
+    )
+;
+```
+
+or
+
+```php
+$specification = PicoSpecification::getInstance()
+    ->addOr(['waitingFor', 0])
+    ->addOr(
+        PicoSpecification::getInstance()
+            ->addAnd(PicoPredicate::getInstance()->equals('waitingFor', null))
+            ->addAnd(PicoPredicate::getInstance()->equals('approvalId', null))
+    )
+;
+```
